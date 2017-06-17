@@ -26,6 +26,8 @@ std::chrono::duration<double, std::milli> out_of_bag_score_time;
 std::chrono::duration<double, std::milli> valid_score_time;
 std::chrono::duration<double, std::milli> metric_time;
 std::chrono::duration<double, std::milli> bagging_time;
+std::chrono::duration<double, std::milli> bagging_subset_time;
+std::chrono::duration<double, std::milli> reset_tree_learner_time;
 std::chrono::duration<double, std::milli> sub_gradient_time;
 std::chrono::duration<double, std::milli> tree_time;
 #endif // TIMETAG
@@ -57,6 +59,8 @@ GBDT::~GBDT() {
   Log::Info("GBDT::valid_score costs %f", valid_score_time * 1e-3);
   Log::Info("GBDT::metric costs %f", metric_time * 1e-3);
   Log::Info("GBDT::bagging costs %f", bagging_time * 1e-3);
+  Log::Info("GBDT::bagging_subset_time costs %f", bagging_subset_time * 1e-3);
+  Log::Info("GBDT::reset_tree_learner_time costs %f", reset_tree_learner_time * 1e-3);
   Log::Info("GBDT::sub_gradient costs %f", sub_gradient_time * 1e-3);
   Log::Info("GBDT::tree costs %f", tree_time * 1e-3);
   #endif
@@ -318,8 +322,18 @@ void GBDT::Bagging(int iter) {
     } else {
       // get subset
       tmp_subset_->ReSize(bag_data_cnt_);
+      #ifdef TIMETAG
+      auto start_time = std::chrono::steady_clock::now();
+      #endif
       tmp_subset_->CopySubset(train_data_, bag_data_indices_.data(), bag_data_cnt_, false);
+      #ifdef TIMETAG
+      bagging_subset_time += std::chrono::steady_clock::now() - start_time;
+      start_time = std::chrono::steady_clock::now();
+      #endif
       tree_learner_->ResetTrainingData(tmp_subset_.get());
+      #ifdef TIMETAG
+      reset_tree_learner_time += std::chrono::steady_clock::now() - start_time;
+      #endif
     }
   }
 }

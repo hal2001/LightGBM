@@ -28,6 +28,8 @@ std::function<void(const std::vector<std::pair<int, double>>&, double* output)>;
 
 #define NO_SPECIFIC (-1)
 
+#define TIMETAG
+
 }  // namespace LightGBM
 
 #endif   // LightGBM_META_H_
